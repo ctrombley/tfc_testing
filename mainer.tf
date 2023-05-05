@@ -28,13 +28,7 @@ module "subnet_addrs" {
   ]
 }
 
-resource "time_sleep" "wait_30_seconds" {
-  create_duration = "30s"
-}
-
 resource "azurerm_resource_group" "vnet" {
-  depends_on = [time_sleep.wait_30_seconds]
-
   name     = "example-resources"
   location = "West Europe"
 }
