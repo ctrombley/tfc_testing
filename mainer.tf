@@ -48,7 +48,7 @@ resource "azurerm_subnet" "pub" {
   resource_group_name                            = azurerm_resource_group.vnet.name
   address_prefixes                               = [module.subnet_addrs.network_cidr_blocks["pub"]]
   service_endpoints                              = []
-  enforce_private_link_endpoint_network_policies = false
+  private_endpoint_network_policies_enabled = false
 }
 resource "azurerm_network_security_group" "pub" {
   name                = "test-pub"
