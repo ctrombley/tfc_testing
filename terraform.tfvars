@@ -1,1 +1,1 @@
-organization = "trombs-test-org"
+organization = "trombs-test-local"
