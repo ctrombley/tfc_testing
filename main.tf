@@ -1,49 +1,43 @@
-provider "aws" {
-}
-
-resource "aws_rds_cluster" "example" {
-  cluster_identifier = "example"
-  engine             = "aurora-postgresql"
-  engine_mode        = "provisioned"
-  engine_version     = "14.6"
-  database_name      = "test"
-  master_username    = "test"
-  master_password    = "must_be_eight_characters"
-
-  serverlessv2_scaling_configuration {
-    max_capacity = 1.0
-    min_capacity = 0.5
+terraform {
+  required_providers {
+    tfe = {
+      version = "~> 0.35.0"
+    }
   }
 }
 
-resource "aws_rds_cluster_instance" "example" {
-  cluster_identifier = aws_rds_cluster.example.id
-  instance_class     = "db.serverless"
-  engine             = aws_rds_cluster.example.engine
-  engine_version     = aws_rds_cluster.example.engine_version
+provider "tfe" {
+  hostname = var.hostname
 }
 
-data "aws_ami" "ubuntu" {
-  most_recent = true
+resource "tfe_workspace" "child" {
+  count        = 10
+  organization = var.organization
+  name         = "child-${count.index}-${random_id.child_id.id}"
 
-  filter {
-    name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
+  lifecycle {
+    postcondition {
+      condition     = self.organization == var.organization 
+      error_message = "org name failed"
+    }
   }
-
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
-
-  owners = ["099720109477"] # Canonical
 }
 
-resource "aws_instance" "web" {
-  ami           = data.aws_ami.ubuntu.id
-  instance_type = "t3.micro"
+resource "random_id" "child_id" {
+  byte_length = 8
+}
 
-  tags = {
-    Name = "HelloWorld"
+resource "tfe_variable" "test-var" {
+  key = "test_var"
+  value = var.random_var
+  category = "env"
+  workspace_id = tfe_workspace.child[0].id
+  description = "This allows the build agent to call back to TFC when executing plans and applies"
+
+  lifecycle {
+    postcondition {
+      condition = self.value == "test_Var"
+      error_message = "var name postcondition failed"
+    }
   }
 }
