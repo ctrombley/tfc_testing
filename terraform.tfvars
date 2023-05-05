@@ -1,1 +1,1 @@
-organization = "hashicorp"
+organization = "trombs-test-org"
