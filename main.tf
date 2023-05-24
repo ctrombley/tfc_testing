@@ -1,29 +1,25 @@
 terraform {
+  required_version = "~> 1.3"
   required_providers {
-    tfe = {
-      version = "~> 0.35.0"
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 4.0"
     }
   }
 }
 
-provider "tfe" {
-  hostname = var.hostname
+locals {
+  default_tags = {
+    hc-config-as-code = "terraform"
+    hc-repo           = "github.com/hashicorp/geoblock-page"
+    hc-owner-dl       = "team-cloudsec@hashicorp.com"
+  }
 }
 
-resource "tfe_workspace" "child" {
-  count        = 3
-  organization = var.organization
-  name         = "child-${count.index}-${random_id.child_id.id}"
-}
+provider "aws" {
+  region = "us-east-1"
 
-resource "random_id" "child_id" {
-  byte_length = 8
-}
-
-resource "tfe_variable" "test-var" {
-  key = "test_var"
-  value = var.random_var
-  category = "env"
-  workspace_id = tfe_workspace.child[0].id
-  description = "This allows the build agent to call back to TFC when executing plans and applies"
+  default_tags {
+    tags = local.default_tags
+  }
 }
