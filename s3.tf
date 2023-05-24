@@ -3,7 +3,7 @@ data "aws_region" "current" {}
 resource "aws_s3_bucket" "geoblock_page" {
   force_destroy = false
 
-  bucket = "hc1-network-perimeter-prod-geoblock-page-${data.aws_region.current.name}"
+  bucket = "trombs-hc1-network-perimeter-prod-geoblock-page-${data.aws_region.current.name}"
 }
 
 resource "aws_s3_bucket_versioning" "geoblock_page" {
