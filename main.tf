@@ -27,3 +27,15 @@ resource "tfe_variable" "test-var" {
   workspace_id = tfe_workspace.child[0].id
   description = "This allows the build agent to call back to TFC when executing plans and applies"
 }
+
+
+check "health_check" {
+  data "http" "terraform_io" {
+    url = "https://www.terraform.io"
+  }
+  assert {
+    condition = data.http.terraform_io.status_code == 200
+    error_message = "${data.http.terraform_io.url} returned an unhealthy status code"
+  }
+}
+
