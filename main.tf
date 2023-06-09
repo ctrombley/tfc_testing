@@ -26,6 +26,13 @@ resource "tfe_variable" "test-var" {
   category = "env"
   workspace_id = tfe_workspace.child[0].id
   description = "This allows the build agent to call back to TFC when executing plans and applies"
+
+  lifecycle {
+    postcondition {
+      condition     = self.category == "env"
+      error_message = "Bad category"
+    }
+  }
 }
 
 
@@ -39,3 +46,10 @@ check "health_check" {
   }
 }
 
+
+check "random_id_randomness" {
+  assert {
+    condition = tfe_workspace.child[0].name != "testing"
+    error_message = "Random ID is not random."
+  }
+}
