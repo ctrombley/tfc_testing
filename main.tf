@@ -14,6 +14,7 @@ resource "tfe_workspace" "child" {
   count        = 3
   organization = var.organization
   name         = "child-${count.index}-${random_id.child_id.id}"
+  tag_names    = ["test"]
 }
 
 resource "random_id" "child_id" {
