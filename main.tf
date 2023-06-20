@@ -30,7 +30,7 @@ module "web_server_sg" {
   description = "Security group for web-server with HTTP ports open within VPC"
   vpc_id      = module.vpc.vpc_id
 
-  ingress_cidr_blocks = module.vpc.private_subnet_cidr_blocks
+  ingress_cidr_blocks = module.vpc.private_subnets_cidr_blocks
 }
 
 module "key_pair" {
@@ -52,13 +52,13 @@ resource "aws_instance" "hashiapp" {
   instance_type               = "t2.micro"
   associate_public_ip_address = true
   subnet_id                   = module.vpc.private_subnets[0]
-  vpc_security_group_ids      = [aws_security_group.hashiapp.id]
+  vpc_security_group_ids      = [module.web_server_sg.security_group_id]
   key_name                    = module.key_pair.key_pair_name
 
   lifecycle {
     postcondition {
       condition     = self.ami == data.hcp_packer_image.learn-packer_image.cloud_image_id
-      error_message = "Must use the latest available AMI, ${data.hcp_packer_image.hashiapp_image.cloud_image_id}."
+      error_message = "Must use the latest available AMI, ${data.hcp_packer_image.learn-packer-image.cloud_image_id}."
     }
   }
 }
