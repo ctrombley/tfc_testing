@@ -1,56 +1,34 @@
 terraform {
   required_providers {
-    tfe = {
-      version = "~> 0.35.0"
+    aws = {
+      version = "~> 5.4.0"
+    }
+
+    hcp = {
+      version = "~> 0.61.0"
     }
   }
 }
 
-provider "tfe" {
-  hostname = var.hostname
+data "hcp_packer_image" "learn-packer_image" {
+  bucket_name     = "learn-packer"
+  channel         = "latest"
+  cloud_provider  = "aws"
+  region          = "us-west-2"
 }
 
-resource "tfe_workspace" "child" {
-  count        = 3
-  organization = var.organization
-  name         = "child-${count.index}-${random_id.child_id.id}"
-  tag_names    = ["test"]
-}
-
-resource "random_id" "child_id" {
-  byte_length = 8
-}
-
-resource "tfe_variable" "test-var" {
-  key = "test_var"
-  value = var.random_var
-  category = "env"
-  workspace_id = tfe_workspace.child[0].id
-  description = "This allows the build agent to call back to TFC when executing plans and applies"
+resource "aws_instance" "hashiapp" {
+  ami                         = data.hcp_packer_image.learn-packer_image.cloud_image_id
+  instance_type               = var.instance_type
+  associate_public_ip_address = true
+  subnet_id                   = aws_subnet.hashiapp.id
+  vpc_security_group_ids      = [aws_security_group.hashiapp.id]
+  key_name                    = aws_key_pair.generated_key.key_name
 
   lifecycle {
     postcondition {
-      condition     = self.category == "env"
-      error_message = "Bad category"
+      condition     = self.ami == data.hcp_packer_image.learn-packer_image.cloud_image_id
+      error_message = "Must use the latest available AMI, ${data.hcp_packer_image.hashiapp_image.cloud_image_id}."
     }
-  }
-}
-
-
-check "health_check" {
-  data "http" "terraform_io" {
-    url = "https://www.terraform.io"
-  }
-  assert {
-    condition = data.http.terraform_io.status_code == 200
-    error_message = "${data.http.terraform_io.url} returned an unhealthy status code"
-  }
-}
-
-
-check "random_id_randomness" {
-  assert {
-    condition = tfe_workspace.child[0].name != "testing"
-    error_message = "Random ID is not random."
   }
 }
