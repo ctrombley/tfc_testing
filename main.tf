@@ -58,7 +58,7 @@ resource "aws_instance" "hashiapp" {
   lifecycle {
     postcondition {
       condition     = self.ami == data.hcp_packer_image.learn-packer_image.cloud_image_id
-      error_message = "Must use the latest available AMI, ${data.hcp_packer_image.learn-packer-image.cloud_image_id}."
+      error_message = "Must use the latest available AMI, ${data.hcp_packer_image.learn-packer_image.cloud_image_id}."
     }
   }
 }
