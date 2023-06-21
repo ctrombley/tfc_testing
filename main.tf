@@ -15,7 +15,7 @@ locals {
 }
 
 data "aws_vpc" "my_vpc" {
-  default = true
+  id = "vpc-0a0b86c69679fc450"
 }
 
 data "aws_subnets" "my_subnets" {
@@ -48,11 +48,11 @@ data "hcp_packer_image" "learn-packer_image" {
   region          = "us-west-2"
 }
 
-resource "aws_instance" "hashiapp" {
+resource "aws_instance" "learn-packer_image" {
   ami                         = data.hcp_packer_image.learn-packer_image.cloud_image_id
   instance_type               = "t2.micro"
   associate_public_ip_address = true
-  subnet_id                   = local.subnets[0]
+  subnet_id                   = "subnet-0376a27ebed64a528"
   vpc_security_group_ids      = [module.web_server_sg.security_group_id]
   key_name                    = "test"
 
