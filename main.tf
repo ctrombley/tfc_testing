@@ -9,35 +9,36 @@ terraform {
     }
   }
 }
-module "vpc" {
-  source = "terraform-aws-modules/vpc/aws"
 
-  name = "my-vpc"
-  cidr = "10.0.0.0/16"
-
-  azs             = ["us-west-1a"]
-  private_subnets = ["10.0.1.0/24"]
-  public_subnets  = ["10.0.101.0/24"]
-
-  enable_nat_gateway = true
-  enable_vpn_gateway = true
+locals {
+  subnets = [for s in data.aws_subnet.my_subnet : s.cidr_block]
 }
+
+data "aws_vpc" "my_vpc" {
+  default = true
+}
+
+data "aws_subnets" "my_subnets" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.my_vpc.id]
+  }
+}
+
+data "aws_subnet" "my_subnet" {
+  for_each = toset(data.aws_subnets.my_subnets.ids)
+  id       = each.value
+}
+
 
 module "web_server_sg" {
   source = "terraform-aws-modules/security-group/aws//modules/http-80"
 
   name        = "web-server"
   description = "Security group for web-server with HTTP ports open within VPC"
-  vpc_id      = module.vpc.vpc_id
+  vpc_id      = data.aws_vpc.my_vpc.id
 
-  ingress_cidr_blocks = module.vpc.private_subnets_cidr_blocks
-}
-
-module "key_pair" {
-  source = "terraform-aws-modules/key-pair/aws"
-
-  key_name           = "deployer-one"
-  create_private_key = true
+  ingress_cidr_blocks = local.subnets
 }
 
 data "hcp_packer_image" "learn-packer_image" {
@@ -51,9 +52,9 @@ resource "aws_instance" "hashiapp" {
   ami                         = data.hcp_packer_image.learn-packer_image.cloud_image_id
   instance_type               = "t2.micro"
   associate_public_ip_address = true
-  subnet_id                   = module.vpc.private_subnets[0]
+  subnet_id                   = local.subnets[0]
   vpc_security_group_ids      = [module.web_server_sg.security_group_id]
-  key_name                    = module.key_pair.key_pair_name
+  key_name                    = "test"
 
   lifecycle {
     postcondition {
