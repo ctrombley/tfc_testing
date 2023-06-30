@@ -63,3 +63,11 @@ resource "aws_instance" "learn-packer_image" {
     }
   }
 }
+
+check "ami_version_check" {
+  assert {
+    condition = aws_instance.learn-packer_image.ami == data.hcp_packer_image.learn-packer_image.cloud_image_id
+    error_message = "Must use the latest available AMI, ${data.hcp_packer_image.learn-packer_image.cloud_image_id}."
+  }
+}
+
