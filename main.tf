@@ -65,8 +65,15 @@ resource "aws_instance" "learn-packer_image" {
 }
 
 check "ami_version_check" {
+  data "hcp_packer_image" "nested_learn-packer_image" {
+    bucket_name     = "learn-packer"
+    channel         = "latest"
+    cloud_provider  = "aws"
+    region          = "us-west-2"
+  }
+
   assert {
-    condition = aws_instance.learn-packer_image.ami == data.hcp_packer_image.learn-packer_image.cloud_image_id
+    condition = aws_instance.learn-packer_image.ami == data.hcp_packer_image.nested_learn-packer_image.cloud_image_id
     error_message = "Must use the latest available AMI, ${data.hcp_packer_image.learn-packer_image.cloud_image_id}."
   }
 }
