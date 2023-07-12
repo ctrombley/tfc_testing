@@ -70,7 +70,7 @@ resource "aws_instance" "learn-packer_image" {
 
 check "ami_version_check" {
   data "aws_instance" "image-instance" {
-    tags = {
+    instance_tags = {
       Name = "learn-packer"
     }
   }
