@@ -3,13 +3,34 @@ provider "aws" {
 
 locals {
   instance_types = [
+    "t2.nano",
+    "t2.micro",
+    "t2.small",
+    "t2.medium",
+    "t2.large",
+    "t2.xlarge",
+    "t2.2xlarge",
     "t3.nano",
     "t3.micro",
     "t3.small",
     "t3.medium",
     "t3.large",
     "t3.xlarge",
-    "t3.2xlarge"
+    "t3.2xlarge",
+    "t3a.nano",
+    "t3a.micro",
+    "t3a.small",
+    "t3a.medium",
+    "t3a.large",
+    "t3a.xlarge",
+    "t3a.2xlarge",
+    "t4g.nano",
+    "t4g.micro",
+    "t4g.small",
+    "t4g.medium",
+    "t4g.large",
+    "t4g.xlarge",
+    "t4g.2xlarge"
   ]
 }
 
@@ -52,7 +73,7 @@ data "aws_ami" "ubuntu" {
 }
 
 resource "aws_instance" "web" {
-  count = 20
+  count = 28
 
   ami           = data.aws_ami.ubuntu.id
   instance_type = local.instance_types[count.index % length(local.instance_types)]
