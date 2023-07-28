@@ -55,9 +55,9 @@ resource "aws_instance" "web" {
   count = 20
 
   ami           = data.aws_ami.ubuntu.id
-  instance_type = local.instance_types[count.index]
+  instance_type = local.instance_types[count.index % length(local.instance_types)]
 
   tags = {
-    Name = "HelloWorld ${count.index % length(local.instance_types)}"
+    Name = "HelloWorld ${count.index}"
   }
 }
