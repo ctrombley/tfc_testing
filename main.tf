@@ -1,6 +1,18 @@
 provider "aws" {
 }
 
+locals {
+  instance_types = [
+    "t3.nano",
+    "t3.micro",
+    "t3.small",
+    "t3.medium",
+    "t3.large",
+    "t3.xlarge",
+    "t3.2xlarge"
+  ]
+}
+
 resource "aws_rds_cluster" "example" {
   cluster_identifier = "example"
   engine             = "aurora-postgresql"
@@ -43,9 +55,9 @@ resource "aws_instance" "web" {
   count = 20
 
   ami           = data.aws_ami.ubuntu.id
-  instance_type = "t3.micro"
+  instance_type = local.instance_types[count.index]
 
   tags = {
-    Name = "HelloWorld ${count.index}"
+    Name = "HelloWorld ${count.index % length(local.instance_types)}"
   }
 }
