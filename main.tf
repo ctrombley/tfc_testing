@@ -1,37 +1,71 @@
 terraform {
   required_providers {
-    tfe = {
-      version = "~> 0.35.0"
+    azurerm = {
+      version = "~> 3.75.0"
     }
   }
 }
 
-resource "tfe_workspace" "child" {
-  count        = 3
-  organization = var.organization
-  name         = "child-${count.index}-${random_id.child_id.id}"
+resource "azurerm_resource_group" "example" {
+  name     = "exampleRG1"
+  location = "West Europe"
 }
 
-resource "random_id" "child_id" {
-  byte_length = 8
+resource "azurerm_virtual_network" "example" {
+  name                = "example-vnet"
+  location            = azurerm_resource_group.example.location
+  resource_group_name = azurerm_resource_group.example.name
+  address_space       = ["10.0.0.0/16"]
 }
 
-resource "tfe_variable" "test-var" {
-  key = "test_var"
-  value = var.random_var
-  category = "env"
-  workspace_id = tfe_workspace.child[0].id
-  description = "This allows the build agent to call back to TFC when executing plans and applies"
-}
+resource "azurerm_subnet" "example" {
+  name                 = "example-subnet"
+  resource_group_name  = azurerm_resource_group.example.name
+  virtual_network_name = azurerm_virtual_network.example.name
+  address_prefixes     = ["10.0.2.0/24"]
 
-
-check "health_check" {
-  data "http" "terraform_io" {
-    url = "https://www.terraform.io"
-  }
-  assert {
-    condition = data.http.terraform_io.status_code == 200
-    error_message = "${data.http.terraform_io.url} returned an unhealthy status code"
+  delegation {
+    name = "Microsoft.Web.hostingEnvironments"
+    service_delegation {
+      name    = "Microsoft.Web/hostingEnvironments"
+      actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
+    }
   }
 }
 
+resource "azurerm_app_service_environment_v3" "example" {
+  name                = "example-asev3"
+  resource_group_name = azurerm_resource_group.example.name
+  subnet_id           = azurerm_subnet.example.id
+
+  internal_load_balancing_mode = "Web, Publishing"
+
+  cluster_setting {
+    name  = "DisableTls1.0"
+    value = "1"
+  }
+
+  cluster_setting {
+    name  = "InternalEncryption"
+    value = "true"
+  }
+
+  cluster_setting {
+    name  = "FrontEndSSLCipherSuiteOrder"
+    value = "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
+  }
+
+  tags = {
+    env         = "production"
+    terraformed = "true"
+  }
+}
+
+resource "azurerm_service_plan" "example" {
+  name                       = "example"
+  resource_group_name        = azurerm_resource_group.example.name
+  location                   = azurerm_resource_group.example.location
+  os_type                    = "Linux"
+  sku_name                   = "I1v2"
+  app_service_environment_id = azurerm_app_service_environment_v3.example.id
+}
