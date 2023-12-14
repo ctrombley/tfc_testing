@@ -24,6 +24,10 @@ resource "tfe_variable" "test-var" {
   description = "This allows the build agent to call back to TFC when executing plans and applies"
 }
 
+module "test_module" {
+  source  = "hashicorp/module/random"
+  version = "1.0.0"
+}
 
 check "health_check" {
   data "http" "terraform_io" {
