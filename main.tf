@@ -6,6 +6,7 @@ terraform {
   }
 }
 
+
 resource "tfe_registry_gpg_key" "ctrombley" {
   ascii_armor = file("public-key.pgp")
 }
