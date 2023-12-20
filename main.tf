@@ -13,7 +13,7 @@ resource "tfe_workspace" "child" {
 }
 
 resource "random_id" "child_id" {
-  byte_length = 8
+  byte_length = 9
 }
 
 resource "tfe_variable" "test-var" {
