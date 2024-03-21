@@ -1,14 +1,21 @@
 terraform {
-  required_providers {
-    tfe = {
-      version = "~> 0.49.2"
+  cloud {
+    organization = "hashicorp"
+    hostname = "tfcdev-781a2fe5.ngrok.io" # Optional; defaults to app.terraform.io
+
+    workspaces {
+      tags = ["child-workspaces"]
     }
   }
 }
 
+provider "tfe" {
+    hostname = "tfcdev-781a2fe5.ngrok.io"
+}
+
 resource "tfe_workspace" "child" {
   count        = 3
-  organization = var.organization
+  organization = "hashicorp"
   name         = "child-${count.index}-${random_id.child_id.id}"
 }
 
@@ -23,19 +30,3 @@ resource "tfe_variable" "test-var" {
   workspace_id = tfe_workspace.child[0].id
   description = "This allows the build agent to call back to TFC when executing plans and applies"
 }
-
-module "test_module" {
-  source  = "hashicorp/module/random"
-  version = "1.0.0"
-}
-
-check "health_check" {
-  data "http" "terraform_io" {
-    url = "https://www.terraform.io"
-  }
-  assert {
-    condition = data.http.terraform_io.status_code == 200
-    error_message = "${data.http.terraform_io.url} returned an unhealthy status code"
-  }
-}
-
