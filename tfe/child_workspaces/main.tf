@@ -1,7 +1,6 @@
 terraform {
   cloud {
     organization = "trombs-test-org"
-    hostname = "app.terraform.io" # Optional; defaults to app.terraform.io
 
     workspaces {
       tags = ["apple"]
@@ -10,7 +9,6 @@ terraform {
 }
 
 provider "tfe" {
-    hostname = "app.terraform.io"
 }
 
 resource "tfe_workspace" "child" {
