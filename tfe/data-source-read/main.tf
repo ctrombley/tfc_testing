@@ -1,16 +1,16 @@
 terraform {
   cloud {
-    hostname = "app.staging.terraform.io"
+    hostname = "app.terraform.io"
     organization = "trombs-test-org"
 
     workspaces {
-      name = "daikon"
+      name = "plan-prune"
     }
   }
 }
 
 provider "tfe" {
-  hostname = "app.staging.terraform.io"
+  hostname = "app.terraform.io"
 }
 
 data "null_data_source" "values" {
