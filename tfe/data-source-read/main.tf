@@ -1,16 +1,17 @@
 terraform {
   cloud {
     hostname = "app.terraform.io"
-    organization = "trombs-test-org"
+    organization = "hashicorp-v2"
 
     workspaces {
-      name = "plan-prune"
+      name = "dsr-cli"
     }
   }
 }
 
 provider "tfe" {
   hostname = "app.terraform.io"
+  organization = "hashicorp-v2"
 }
 
 data "null_data_source" "values" {
