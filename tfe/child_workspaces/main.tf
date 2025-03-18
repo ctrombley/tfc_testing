@@ -28,3 +28,7 @@ resource "tfe_workspace" "child" {
 resource "random_id" "child_id" {
   byte_length = 8
 }
+
+output "workspace_id" {
+  value = tfe_workspace.child[*].id
+}
