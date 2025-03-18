@@ -1,6 +1,6 @@
 terraform {
   cloud {
-    hostname = "tfc_testing"
+    hostname = "tfcdev-781a2fe5.ngrok.io"
     organization = "hashicorp"
 
     workspaces {
@@ -15,7 +15,7 @@ provider "tfe" {
 
 resource "tfe_project" "this" {
   organization = "hashicorp"
-  name = "test"
+  name = "Experiments"
 }
 
 resource "tfe_workspace" "child" {
