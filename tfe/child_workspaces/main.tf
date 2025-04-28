@@ -19,7 +19,7 @@ data "tfe_project" "this" {
 }
 
 resource "tfe_workspace" "child" {
-  count        = 6
+  count        = 8
   organization = "hashicorp"
   name         = "child-${count.index}-${random_id.child_id.id}"
   project_id = data.tfe_project.this.id
