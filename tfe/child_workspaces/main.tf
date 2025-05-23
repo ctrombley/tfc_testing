@@ -4,7 +4,7 @@ terraform {
     organization = "hashicorp"
 
     workspaces {
-      name = "cw2"
+      name = "child_workspaces"
     }
   }
 }
@@ -19,7 +19,7 @@ data "tfe_project" "this" {
 }
 
 resource "tfe_workspace" "child" {
-  count        = 8
+  count        = 7
   organization = "hashicorp"
   name         = "child-${count.index}-${random_id.child_id.id}"
   project_id = data.tfe_project.this.id
